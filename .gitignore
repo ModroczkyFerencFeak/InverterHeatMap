@@ -1,0 +1,10 @@
+# Geocoding log (geo.py futás hibái)
+geo.log
+# Python cache
+__pycache__/
+
+# Érzékeny környezet (backend/frontend titkok)
+.env
+.env.*
+# Push védelem: tárolt jelszó hash (ne kerüljön gitbe)
+.push-auth
