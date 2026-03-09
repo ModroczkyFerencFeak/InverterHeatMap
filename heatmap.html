@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Heatmap</title>
-  <link rel="icon" type="image/png" href="media/logo.png" />
+  <link rel="icon" type="image/png" href="/media/logo.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
@@ -167,7 +167,7 @@
       </form>
     </div>
   </div>
-  <script src="auth-config.js"></script>
+  <script src="/auth-config.js"></script>
   <script>
 (function(){
   var gate = document.getElementById('auth-gate');
@@ -177,29 +177,10 @@
   var authUser = window.__AUTH_USER__;
   var authHash = window.__AUTH_HASH__;
   if (sessionStorage.getItem('geomap_auth') === '1') { gate.style.display = 'none'; return; }
+  if (sessionStorage.getItem('geomap_auth') === 'visitor') { gate.style.display = 'none'; window.__GEOMAP_VISITOR__ = true; return; }
   if (!authUser || !authHash) { gate.style.display = 'none'; return; }
-  gate.style.display = 'flex';
-  function hex(b) { var h=''; for (var i=0;i<b.length;i++) h+=('0'+b[i].toString(16)).slice(-2); return h; }
-  function sha256(str) {
-    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)).then(function(b){ return hex(Array.from(new Uint8Array(b))); });
-  }
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    var u = (document.getElementById('auth-user').value || '');
-    var p = document.getElementById('auth-pass').value || '';
-    errEl.style.display = 'none';
-    sha256(p).then(function(h) {
-      h = h.toLowerCase();
-      var want = (authHash + '').trim().toLowerCase();
-      if (u === authUser && h === want) {
-        sessionStorage.setItem('geomap_auth', '1');
-        gate.style.display = 'none';
-      } else {
-        errEl.textContent = 'Hibás felhasználónév vagy jelszó.';
-        errEl.style.display = 'block';
-      }
-    });
-  });
+  window.location.replace('/login');
+  return;
 })();
   </script>
   <div id="loading"><span>Térkép betöltése...</span></div>
@@ -325,7 +306,7 @@
   function showUI() {
     var loading = document.getElementById('loading');
     if (loading) loading.style.display = 'none';
-    var s = document.getElementById('sidebar'); if (s) s.style.display = 'block';
+    var s = document.getElementById('sidebar'); if (s && !window.__GEOMAP_VISITOR__) s.style.display = 'block';
     var w = document.getElementById('legend-wrap'); if (w) w.style.display = 'block';
     var logo = document.getElementById('map-logo'); if (logo) logo.style.display = 'block';
   }
@@ -641,7 +622,7 @@
 
   var dataPromise = window.__MAP_DATA__
     ? Promise.resolve(window.__MAP_DATA__)
-    : fetch('data.json').then(function(r) {
+    : fetch('/data.json').then(function(r) {
         if (!r.ok) throw new Error('data.json nem elérhető (pl. indítsd a Live Server-t a mappában).');
         return r.json();
       });

@@ -1,7 +1,11 @@
 {
   "buildCommand": "node scripts/build-auth.js",
   "outputDirectory": ".",
+  "redirects": [
+    { "source": "/", "destination": "/login", "permanent": false }
+  ],
   "rewrites": [
-    { "source": "/", "destination": "/index.html" }
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/map", "destination": "/heatmap.html" }
   ]
 }

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bejelentkezés – Heatmap</title>
-  <link rel="icon" type="image/png" href="media/logo.png" />
+  <link rel="icon" type="image/png" href="/media/logo.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; }
@@ -71,7 +71,7 @@
   <div class="overlay"></div>
   <div class="login-wrap">
     <div class="login-card">
-      <img src="media/logo.png" alt="Logo" class="login-logo" />
+      <img src="/media/logo.png" alt="Logo" class="login-logo" />
       <h1>Bejelentkezés</h1>
       <p class="sub">A térkép megtekintéséhez jelentkezz be.</p>
       <p id="auth-err"></p>
@@ -91,17 +91,17 @@
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
 })();
   </script>
-  <script src="auth-config.js"></script>
+  <script src="/auth-config.js"></script>
   <script>
 (function(){
   var authUser = window.__AUTH_USER__;
   var authHash = (window.__AUTH_HASH__ || '').trim().toLowerCase();
-  if (sessionStorage.getItem('geomap_auth') === '1') {
-    window.location.replace('heatmap.html');
+  if (sessionStorage.getItem('geomap_auth') === '1' || sessionStorage.getItem('geomap_auth') === 'visitor') {
+    window.location.replace('/map');
     return;
   }
   if (!authUser || !authHash) {
-    window.location.replace('heatmap.html');
+    window.location.replace('/map');
     return;
   }
   var form = document.getElementById('login-form');
@@ -112,15 +112,22 @@
   }
   form.addEventListener('submit', function(e) {
     e.preventDefault();
-    var u = (document.getElementById('auth-user').value || '');
+    var u = (document.getElementById('auth-user').value || '').trim();
     var p = (document.getElementById('auth-pass').value || '');
+    if (typeof p.normalize === 'function') p = p.normalize('NFC');
     errEl.style.display = 'none';
     errEl.textContent = '';
+    if (u === 'visitor' && p === 'visitor') {
+      sessionStorage.setItem('geomap_auth', 'visitor');
+      window.location.replace('/map');
+      return;
+    }
     sha256(p).then(function(h) {
       h = h.toLowerCase();
-      if (u === authUser && h === authHash) {
+      var wantUser = (typeof authUser === 'string' ? authUser : '').trim();
+      if (u === wantUser && h === authHash) {
         sessionStorage.setItem('geomap_auth', '1');
-        window.location.replace('heatmap.html');
+        window.location.replace('/map');
       } else {
         errEl.textContent = 'Hibás felhasználónév vagy jelszó.';
         errEl.style.display = 'block';
