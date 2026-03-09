@@ -2,11 +2,132 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0;url=heatmap.html" />
-  <title>Geomap</title>
-  <script>window.location.replace("heatmap.html");</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bejelentkezés – Heatmap</title>
+  <link rel="icon" type="image/png" href="media/logo.png" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; font-size: 14px; overflow: hidden; }
+    #bg-map { position: fixed; inset: 0; z-index: 0; }
+    #bg-map .leaflet-control-container { display: none; }
+    .overlay {
+      position: fixed; inset: 0; z-index: 1;
+      background: linear-gradient(135deg, rgba(15,23,42,.75) 0%, rgba(30,41,59,.6) 50%, rgba(15,23,42,.8) 100%);
+      pointer-events: none;
+    }
+    .login-wrap {
+      position: relative; z-index: 2;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px;
+    }
+    .login-card {
+      width: 100%; max-width: 400px;
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(12px);
+      padding: 40px 36px;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.1) inset;
+    }
+    .login-logo {
+      display: block; margin: 0 auto 24px; max-height: 64px; max-width: 160px; width: auto; height: auto;
+    }
+    .login-card h1 {
+      margin: 0 0 6px 0; font-size: 22px; font-weight: 700; color: #0f172a; text-align: center; letter-spacing: -0.02em;
+    }
+    .login-card .sub {
+      margin: 0 0 28px 0; font-size: 14px; color: #64748b; text-align: center; line-height: 1.4;
+    }
+    .login-card label {
+      display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; letter-spacing: 0.02em;
+    }
+    .login-card input[type="text"],
+    .login-card input[type="password"] {
+      width: 100%; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 15px; margin-bottom: 18px;
+      background: #fff; transition: border-color .2s, box-shadow .2s;
+    }
+    .login-card input::placeholder { color: #94a3b8; }
+    .login-card input:focus {
+      outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    }
+    .login-card button[type="submit"] {
+      width: 100%; padding: 14px 20px; margin-top: 8px;
+      background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+      color: #fff; border: none; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37,99,235,.4);
+      transition: transform .05s, box-shadow .2s;
+    }
+    .login-card button[type="submit"]:hover {
+      box-shadow: 0 6px 20px rgba(37,99,235,.5);
+    }
+    .login-card button[type="submit"]:active { transform: scale(0.99); }
+    #auth-err {
+      display: none; margin-bottom: 14px; padding: 10px 12px;
+      background: #fef2f2; color: #b91c1c; font-size: 13px; border-radius: 8px; border: 1px solid #fecaca;
+    }
+  </style>
 </head>
 <body>
-  <p><a href="heatmap.html">Térkép megnyitása</a></p>
+  <div id="bg-map"></div>
+  <div class="overlay"></div>
+  <div class="login-wrap">
+    <div class="login-card">
+      <img src="media/logo.png" alt="Logo" class="login-logo" />
+      <h1>Bejelentkezés</h1>
+      <p class="sub">A térkép megtekintéséhez jelentkezz be.</p>
+      <p id="auth-err"></p>
+      <form id="login-form">
+        <label for="auth-user">Felhasználónév</label>
+        <input type="text" id="auth-user" autocomplete="username" placeholder="Felhasználónév" required />
+        <label for="auth-pass">Jelszó</label>
+        <input type="password" id="auth-pass" autocomplete="current-password" placeholder="••••••••" required />
+        <button type="submit">Belépés</button>
+      </form>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+(function(){
+  var map = L.map('bg-map', { zoomControl: false }).setView([47.16, 19.5], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+})();
+  </script>
+  <script src="auth-config.js"></script>
+  <script>
+(function(){
+  var authUser = window.__AUTH_USER__;
+  var authHash = (window.__AUTH_HASH__ || '').trim().toLowerCase();
+  if (sessionStorage.getItem('geomap_auth') === '1') {
+    window.location.replace('heatmap.html');
+    return;
+  }
+  if (!authUser || !authHash) {
+    window.location.replace('heatmap.html');
+    return;
+  }
+  var form = document.getElementById('login-form');
+  var errEl = document.getElementById('auth-err');
+  function hex(b) { var h=''; for (var i=0;i<b.length;i++) h+=('0'+b[i].toString(16)).slice(-2); return h; }
+  function sha256(str) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)).then(function(b){ return hex(Array.from(new Uint8Array(b))); });
+  }
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var u = (document.getElementById('auth-user').value || '').trim();
+    var p = document.getElementById('auth-pass').value || '';
+    errEl.style.display = 'none';
+    errEl.textContent = '';
+    sha256(p).then(function(h) {
+      h = h.toLowerCase();
+      if (u === authUser && h === authHash) {
+        sessionStorage.setItem('geomap_auth', '1');
+        window.location.replace('heatmap.html');
+      } else {
+        errEl.textContent = 'Hibás felhasználónév vagy jelszó.';
+        errEl.style.display = 'block';
+      }
+    });
+  });
+})();
+  </script>
 </body>
 </html>

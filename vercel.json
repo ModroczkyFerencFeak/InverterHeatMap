@@ -1,6 +1,6 @@
 {
   "buildCommand": "node scripts/build-auth.js",
   "rewrites": [
-    { "source": "/", "destination": "/heatmap.html" }
+    { "source": "/", "destination": "/index.html" }
   ]
 }
