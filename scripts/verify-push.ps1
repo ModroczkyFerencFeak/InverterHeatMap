@@ -1,7 +1,13 @@
 # Push elott ellenorzi a megadott felhasznalonev + jelszo hash-et a .push-auth fajlhoz kepest.
 # A .git/hooks/pre-push hivja. Kilepeskod: 0 = OK, 1 = elutasitva.
+# Ha a hook nem redirectalja a stdint (pl. exec 0</dev/tty), a Git ref lista kerulne a Read-Host-ba – ezert eldobjuk.
 
 $ErrorActionPreference = "Stop"
+# Git a ref listat adja a stdinnen; olvassuk ki es dobjuk el, hogy a Read-Host ne azt kapja
+try {
+    while ($null -ne ($null = [Console]::In.ReadLine())) { }
+} catch { }
+
 # A hook a repo gyokeret hasznalja cwd-kent
 $repoRoot = (Get-Location).Path
 $authFile = Join-Path $repoRoot ".push-auth"
