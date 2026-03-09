@@ -612,7 +612,12 @@
         fillOpacity: 0.7,
         data: m
       });
-      marker.bindPopup(m.popup, { maxWidth: 280 });
+      marker.bindPopup(
+        window.__GEOMAP_VISITOR__
+          ? '<b>Telepítve:</b> ' + esc(m.installed != null ? m.installed : '–')
+          : (m.popup || ''),
+        { maxWidth: 280 }
+      );
       if (m.address_short) marker.bindTooltip(m.address_short, { permanent: false, direction: 'top', className: 'marker-tooltip' });
       marker.addTo(cluster);
       allMarkers.push(marker);
