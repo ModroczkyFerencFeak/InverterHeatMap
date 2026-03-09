@@ -8,3 +8,5 @@ __pycache__/
 .env.*
 # Push védelem: tárolt jelszó hash (ne kerüljön gitbe)
 .push-auth
+# Belépő a statikus oldalhoz (Vercel: build generálja; helyben: setup-web-auth.ps1)
+auth-config.js
