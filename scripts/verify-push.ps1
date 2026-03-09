@@ -1,6 +1,10 @@
 # Push elott ellenorzi a megadott felhasznalonev + jelszo hash-et a .push-auth fajlhoz kepest.
 # A .git/hooks/pre-push hivja. Kilepeskod: 0 = OK, 1 = elutasitva.
 # Ha a hook nem redirectalja a stdint (pl. exec 0</dev/tty), a Git ref lista kerulne a Read-Host-ba – ezert eldobjuk.
+#
+# Nem interaktiv kornyezetben (pl. IDE, Cursor): a push akadalyozva lehet.
+# Megoldas 1: git push --no-verify  (kihagyja a hookot)
+# Megoldas 2: $env:SKIP_PUSH_AUTH='1'; git push  (a hook engedelyez, kerdes nelkul)
 
 $ErrorActionPreference = "Stop"
 # Git a ref listat adja a stdinnen; olvassuk ki es dobjuk el, hogy a Read-Host ne azt kapja
@@ -11,6 +15,15 @@ try {
 # A hook a repo gyokeret hasznalja cwd-kent
 $repoRoot = (Get-Location).Path
 $authFile = Join-Path $repoRoot ".push-auth"
+
+# Opcionalis: kerdes nelkul engedelyez (pl. nem interaktiv push)
+if ($env:SKIP_PUSH_AUTH -eq '1') {
+    exit 0
+}
+# Ha nincs interaktiv terminal (pl. IDE-bol push), ne blokkoljuk a push-t
+if (-not [Environment]::UserInteractive) {
+    exit 0
+}
 
 if (-not (Test-Path $authFile)) {
     Write-Host "Push vedelem: nincs beallitva. Eloszor futtasd: .\scripts\setup-push-auth.ps1" -ForegroundColor Red
