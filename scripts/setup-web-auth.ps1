@@ -30,4 +30,12 @@ $envContent["WEB_AUTH_USER"] = $user
 $envContent["WEB_AUTH_HASH"] = $hash
 $lines = $envContent.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }
 $lines | Set-Content -Path $envFile -Encoding UTF8
+
+$authConfigPath = Join-Path $repoRoot "auth-config.js"
+$authJs = "// Megtekinteshez szukseges belepes (ugyanaz, mint a .env-ben). Generalva: setup-web-auth.ps1`n"
+$authJs += "window.__AUTH_USER__ = '$user';`n"
+$authJs += "window.__AUTH_HASH__ = '$hash';`n"
+Set-Content -Path $authConfigPath -Value $authJs -Encoding UTF8
+
 Write-Host "Kesz. A .env fajlban elmentve (WEB_AUTH_USER, WEB_AUTH_HASH). Inditsd a start-server.bat-ot, majd a bongeszo megkeri a felhasznalonevet es jelszot." -ForegroundColor Green
+Write-Host "Az auth-config.js is frissitve (statikus oldal / GitHub Pages belepeshez)." -ForegroundColor Green

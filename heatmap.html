@@ -154,6 +154,54 @@
   </style>
 </head>
 <body>
+  <div id="auth-gate" style="display:none; position:fixed; inset:0; z-index:10001; background:#f8fafc; flex-direction:column; align-items:center; justify-content:center; font-family:inherit;">
+    <div style="background:#fff; padding:32px; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.12); min-width:280px;">
+      <h2 style="margin:0 0 20px 0; font-size:18px; color:#1e293b;">Bejelentkezés</h2>
+      <p id="auth-gate-err" style="display:none; color:#b91c1c; font-size:13px; margin-bottom:12px;"></p>
+      <form id="auth-gate-form" style="display:flex; flex-direction:column; gap:12px;">
+        <label style="font-size:12px; color:#475569;">Felhasználónév</label>
+        <input type="text" id="auth-user" autocomplete="username" style="padding:10px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px;" />
+        <label style="font-size:12px; color:#475569;">Jelszó</label>
+        <input type="password" id="auth-pass" autocomplete="current-password" style="padding:10px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px;" />
+        <button type="submit" style="padding:10px 16px; background:#2563eb; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Belépés</button>
+      </form>
+    </div>
+  </div>
+  <script src="auth-config.js"></script>
+  <script>
+(function(){
+  var gate = document.getElementById('auth-gate');
+  var form = document.getElementById('auth-gate-form');
+  var errEl = document.getElementById('auth-gate-err');
+  if (!gate || !form) return;
+  var authUser = window.__AUTH_USER__;
+  var authHash = window.__AUTH_HASH__;
+  if (sessionStorage.getItem('geomap_auth') === '1') { gate.style.display = 'none'; return; }
+  if (!authUser || !authHash) { gate.style.display = 'none'; return; }
+  gate.style.display = 'flex';
+  function hex(b) { var h=''; for (var i=0;i<b.length;i++) h+=('0'+b[i].toString(16)).slice(-2); return h; }
+  function sha256(str) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)).then(function(b){ return hex(Array.from(new Uint8Array(b))); });
+  }
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var u = (document.getElementById('auth-user').value || '').trim();
+    var p = document.getElementById('auth-pass').value || '';
+    errEl.style.display = 'none';
+    sha256(p).then(function(h) {
+      h = h.toLowerCase();
+      var want = (authHash + '').trim().toLowerCase();
+      if (u === authUser && h === want) {
+        sessionStorage.setItem('geomap_auth', '1');
+        gate.style.display = 'none';
+      } else {
+        errEl.textContent = 'Hibás felhasználónév vagy jelszó.';
+        errEl.style.display = 'block';
+      }
+    });
+  });
+})();
+  </script>
   <div id="loading"><span>Térkép betöltése...</span></div>
   <div id="sidebar" style="display:none;">
     <div id="sidebar-header" title="Kattints az összecsukáshoz / kinyitáshoz">
@@ -203,7 +251,6 @@
       <datalist id="model-list"></datalist>
     </div>
     <div id="data-panel">
-      <p style="margin:0 0 12px 0; padding:8px 10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; font-size:11px; color:#1e40af;">Ha az adat nem tölt be (nagy fájl): nyisd meg a <strong>heatmap-standalone.html</strong> fájlt fájlkezelőben (dupla kattintás) – nincs szerver, minden adat benne van.</p>
       <div class="panel-section">
         <div class="panel-section-title">Összesítés</div>
         <div class="stats-grid">
