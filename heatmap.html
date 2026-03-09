@@ -185,7 +185,7 @@
   }
   form.addEventListener('submit', function(e) {
     e.preventDefault();
-    var u = (document.getElementById('auth-user').value || '').trim();
+    var u = (document.getElementById('auth-user').value || '');
     var p = document.getElementById('auth-pass').value || '';
     errEl.style.display = 'none';
     sha256(p).then(function(h) {
@@ -694,7 +694,6 @@
       var msg = (err && err.message ? err.message : 'data betöltése sikertelen.');
       var tip = 'Tipp: nyisd meg a <strong>heatmap-standalone.html</strong> fájlt (adat beágyazva), vagy ellenőrizd, hogy a <strong>data.json</strong> ugyanabban a mappában van-e (pl. 127.0.0.1:5500/data.json).';
       hideLoading('Hiba: ' + msg + '<br><br>' + tip);
-      console.error(err);
     });
 
   window.map = map;
@@ -702,7 +701,6 @@
   window.exportVisible = exportVisible;
   } catch (e) {
     hideLoading('Hiba: ' + (e && e.message ? e.message : String(e)));
-    console.error(e);
   }
   }
   if (document.readyState === 'complete') {

@@ -112,8 +112,8 @@
   }
   form.addEventListener('submit', function(e) {
     e.preventDefault();
-    var u = (document.getElementById('auth-user').value || '').trim();
-    var p = document.getElementById('auth-pass').value || '';
+    var u = (document.getElementById('auth-user').value || '');
+    var p = (document.getElementById('auth-pass').value || '');
     errEl.style.display = 'none';
     errEl.textContent = '';
     sha256(p).then(function(h) {

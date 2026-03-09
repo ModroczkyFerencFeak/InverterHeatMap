@@ -11,8 +11,6 @@ const user = (process.env.AUTH_USER || '').trim();
 const hash = (process.env.AUTH_HASH || '').trim().toLowerCase();
 
 if (process.env.VERCEL && (!user || !hash)) {
-  console.error('HIBA: Vercel buildhez kötelező az AUTH_USER és AUTH_HASH Environment Variable.');
-  console.error('Vercel → Project → Settings → Environment Variables → add AUTH_USER és AUTH_HASH (Production).');
   process.exit(1);
 }
 

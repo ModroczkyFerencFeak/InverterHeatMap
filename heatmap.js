@@ -219,7 +219,6 @@ function exportVisible() {
                 var coords = JSON.stringify(layer.toGeoJSON());
                 layer.on('click', function() {
                     alert(coords);
-                    console.log(coords);
                 });
                 drawnItems_draw_control_868b856f41813093dcf2e5046829f326.addLayer(layer);
             });
@@ -359,7 +358,6 @@ function exportVisible() {
             L.Control.TimeDimensionCustom = L.Control.TimeDimension.extend({
                 _getDisplayDateFormat: function(date){
                     var newdate = new moment(date);
-                    console.log(newdate)
                     return newdate.format("YYYY/MM/DD");
                 }
             });

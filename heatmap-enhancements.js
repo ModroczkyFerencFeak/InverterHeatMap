@@ -33,7 +33,7 @@
       } else {
         if (map.hasLayer(feature_group_9b76169b5aaf4ac303d71d9ce3d1f690)) map.removeLayer(feature_group_9b76169b5aaf4ac303d71d9ce3d1f690);
       }
-    }catch(err){console.warn('togglePins error', err);} 
+    }catch(err){} 
   }
 
   whenReady(function(){
@@ -51,7 +51,7 @@
           if (!map.hasLayer(feature_group_9b76169b5aaf4ac303d71d9ce3d1f690)) map.addLayer(feature_group_9b76169b5aaf4ac303d71d9ce3d1f690);
         }
       }, 40);
-    }catch(err){console.warn('enhancer init error', err);}    
+    }catch(err){}    
   });
 
 })();
