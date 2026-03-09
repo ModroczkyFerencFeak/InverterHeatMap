@@ -25,4 +25,8 @@ $bytes = [System.Text.Encoding]::UTF8.GetBytes($pass)
 $hash = [BitConverter]::ToString($sha.ComputeHash($bytes)).Replace("-","").ToLowerInvariant()
 $line = "$user`:$hash"
 $line | Set-Content -Path $authFile -Encoding UTF8 -NoNewline
-Write-Host "Kesz. A .push-auth letrejott (hash-elt jelszo). Push-kor ezt a felhasznalot es jelszot kell megadni." -ForegroundColor Green
+Write-Host ""
+Write-Host "Kesz. A .push-auth letrejott (hash-elt jelszo)." -ForegroundColor Green
+Write-Host "Kovetkezo lepes: futtasd a  git push origin main  parancsot." -ForegroundColor Cyan
+Write-Host "A push elott a terminal megkeri ugyanezt a felhasznalonevet es jelszot – add meg, es a feltoltes megy." -ForegroundColor Cyan
+Write-Host ""

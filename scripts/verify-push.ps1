@@ -8,6 +8,7 @@ $authFile = Join-Path $repoRoot ".push-auth"
 
 if (-not (Test-Path $authFile)) {
     Write-Host "Push vedelem: nincs beallitva. Eloszor futtasd: .\scripts\setup-push-auth.ps1" -ForegroundColor Red
+    Write-Host "  (Megadod egy felhasznalot es jelszot, utana push-kor ugyanazt kell beirni.)" -ForegroundColor Yellow
     exit 1
 }
 

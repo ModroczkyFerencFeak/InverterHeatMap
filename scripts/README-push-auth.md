@@ -1,10 +1,40 @@
 # Push védelem (felhasználónév + jelszó)
 
-A `git push` csak akkor megy végbe, ha megadod a beállított felhasználónevet és jelszót. A jelszó csak hash-elt formában tárolódik (`.push-auth`), és ez a fájl nincs feltöltve a gitbe.
+A `git push` csak akkor megy végbe, ha megadod a beállított felhasználónevet és jelszót.
 
-## 1. Beállítás (egyszer)
+---
 
-A repo gyökeréből futtasd (PowerShell):
+## Gyors lépések: hogyan tölts fel jelszóval
+
+**1. Beállítás (csak egyszer)**  
+A projekt mappájában (Geomap) nyiss PowerShell-t, és futtasd:
+
+```powershell
+.\scripts\setup-push-auth.ps1
+```
+
+- Beírod a **felhasználónevet** (pl. `admin`), Enter.
+- Beírod a **jelszót** (nem látszik, amikor gépeled), Enter.
+- Ettől kezdve ez a pár lesz a push jelszava.
+
+**2. Feltöltés (minden push-nál)**  
+Ugyanebben a mappában:
+
+```powershell
+git add .
+git commit -m "üzenet"
+git push origin main
+```
+
+- A **push** után a terminál megkéri: **Felhasználónév:** → add meg ugyanazt, amit a beállításnál megadtál.
+- Aztán: **Jelszó:** → add meg ugyanazt a jelszót.
+- Ha jó, a feltöltés végigmegy. Ha rossz, „Hibás felhasználónév vagy jelszó”, és a push megáll.
+
+---
+
+## Részletesen
+
+### Beállítás (egyszer)
 
 ```powershell
 .\scripts\setup-push-auth.ps1
@@ -12,7 +42,7 @@ A repo gyökeréből futtasd (PowerShell):
 
 Meg kell adnod egy felhasználónevet és egy jelszót. Ezek kerülnek eltárolásra (a jelszó SHA-256 hash-ként). A `.push-auth` fájl a `.gitignore` miatt nem kerül fel a távoli repóba.
 
-## 2. Push
+### Push
 
 Amikor `git push`-t futtatsz, a hook megkéri a felhasználónevet és a jelszót. Ha egyezik a beállított értékkel, a push folytatódik; különben megtagadásra kerül.
 
