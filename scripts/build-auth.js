@@ -7,10 +7,16 @@
 const fs = require('fs');
 const path = require('path');
 
-const user = process.env.AUTH_USER || '';
+const user = (process.env.AUTH_USER || '').trim();
 const hash = (process.env.AUTH_HASH || '').trim().toLowerCase();
-const outPath = path.join(__dirname, '..', 'auth-config.js');
 
+if (process.env.VERCEL && (!user || !hash)) {
+  console.error('HIBA: Vercel buildhez kötelező az AUTH_USER és AUTH_HASH Environment Variable.');
+  console.error('Vercel → Project → Settings → Environment Variables → add AUTH_USER és AUTH_HASH (Production).');
+  process.exit(1);
+}
+
+const outPath = path.join(__dirname, '..', 'auth-config.js');
 const content = `// Generálva a build során (Vercel: AUTH_USER, AUTH_HASH)
 window.__AUTH_USER__ = ${JSON.stringify(user)};
 window.__AUTH_HASH__ = ${JSON.stringify(hash)};
